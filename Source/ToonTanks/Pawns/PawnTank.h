@@ -32,6 +32,8 @@ private:
 	void CalculateMoveInput(float Value);
 	void CalculateRotateInput(float Value);
 
+	APlayerController* PlayerControllerRef;
+
 	void Move();
 	void Rotate();
 
@@ -48,4 +50,5 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void HandleDestruction() override;
 };

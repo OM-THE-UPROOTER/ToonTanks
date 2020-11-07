@@ -3,6 +3,8 @@
 
 #include "PawnBase.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/StaticMesh.h"
+#include "ToonTanks/Actors/ProjectileBase.h"
 
 // Sets default values
 APawnBase::APawnBase()
@@ -16,9 +18,33 @@ APawnBase::APawnBase()
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 	BaseMesh->SetupAttachment(RootComponent);
 
-	TurnMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Turn Mesh"));
-	TurnMesh->SetupAttachment(BaseMesh);
+	TurretMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Turn Mesh"));
+	TurretMesh->SetupAttachment(BaseMesh);
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn Point"));
-	ProjectileSpawnPoint->SetupAttachment(TurnMesh);
+	ProjectileSpawnPoint->SetupAttachment(TurretMesh);
+}
+
+void APawnBase::RotateTurret(FVector LookAtTarget)
+{
+	FVector LookAtTargetCleaned = FVector(LookAtTarget.X, LookAtTarget.Y, TurretMesh->GetComponentLocation().Z);
+	FVector StartLocation = TurretMesh->GetComponentLocation();
+	
+	FRotator TurretRotation = FVector(LookAtTargetCleaned - StartLocation).Rotation();
+	TurretMesh->SetWorldRotation(TurretRotation);
+}
+
+void APawnBase::Fire()
+{
+	if (ProjectileClass)
+	{
+		FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
+		FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
+		AProjectileBase* TempProjectile = GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass,SpawnLocation,SpawnRotation );
+		TempProjectile->SetOwner(this);
+	}
+}
+
+void APawnBase::HandleDestruction()
+{
 }
